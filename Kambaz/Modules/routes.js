@@ -13,19 +13,15 @@ export default function ModuleRoutes(app) {
 
   const deleteModule = async (req, res) => {
     const { moduleId } = req.params;
-    await modulesDao.deleteModule(moduleId);
-    res.json({ status: "Module deleted successfully" });
+    const status = await modulesDao.deleteModule(moduleId);
+    res.send(status);
   };
 
   const updateModule = async (req, res) => {
     const { moduleId } = req.params;
     const moduleUpdates = req.body;
-    const updatedModule = await modulesDao.updateModule(moduleId, moduleUpdates);
-    if (updatedModule) {
-      res.json(updatedModule);
-    } else {
-      res.status(404).json({ message: "Module not found" });
-    }
+    const status = await modulesDao.updateModule(moduleId, moduleUpdates);
+    res.send(status);
   };
 
   app.get("/api/modules/:moduleId", findModuleById);

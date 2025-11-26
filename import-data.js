@@ -3,9 +3,11 @@ import mongoose from "mongoose";
 import coursesData from "./Kambaz/Database/courses.js";
 import modulesData from "./Kambaz/Database/modules.js";
 import assignmentsData from "./Kambaz/Database/assignments.js";
+import enrollmentsData from "./Kambaz/Database/enrollments.js";
 import CourseModel from "./Kambaz/Courses/model.js";
 import ModuleModel from "./Kambaz/Modules/model.js";
 import AssignmentModel from "./Kambaz/Assignments/model.js";
+import EnrollmentModel from "./Kambaz/Enrollments/model.js";
 
 const CONNECTION_STRING = process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
 
@@ -19,6 +21,7 @@ async function importData() {
     await CourseModel.deleteMany({});
     await ModuleModel.deleteMany({});
     await AssignmentModel.deleteMany({});
+    await EnrollmentModel.deleteMany({});
     console.log("Cleared existing collections");
 
     // Import courses - convert date strings to Date objects
@@ -42,6 +45,16 @@ async function importData() {
     }));
     const assignments = await AssignmentModel.insertMany(assignmentsToImport);
     console.log(`Imported ${assignments.length} assignments`);
+
+    // Import enrollments - convert _id format to match DAO pattern (user-course)
+    const enrollmentsToImport = enrollmentsData.map(enrollment => ({
+      ...enrollment,
+      _id: enrollment._id || `${enrollment.user}-${enrollment.course}`,
+      enrollmentDate: enrollment.enrollmentDate ? new Date(enrollment.enrollmentDate) : new Date(),
+      status: enrollment.status || "ENROLLED",
+    }));
+    const enrollments = await EnrollmentModel.insertMany(enrollmentsToImport);
+    console.log(`Imported ${enrollments.length} enrollments`);
 
     console.log("Data import completed successfully!");
     process.exit(0);

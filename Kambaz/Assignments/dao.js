@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export const findAssignmentsForCourse = (courseId) => model.find({ course: courseId }).lean();
 
-export const findAssignmentById = (assignmentId) => model.findById(assignmentId);
+export const findAssignmentById = (assignmentId) => model.findById(assignmentId).lean();
 
 export const createAssignment = async (assignment) => {
   // Remove _id if present to avoid conflicts
@@ -13,7 +13,8 @@ export const createAssignment = async (assignment) => {
     _id: assignmentId,
     ...assignmentWithoutId,
   };
-  return model.create(assignmentData);
+  const created = await model.create(assignmentData);
+  return created.toObject();
 };
 
 export const deleteAssignment = async (assignmentId) => {
@@ -22,6 +23,6 @@ export const deleteAssignment = async (assignmentId) => {
 
 export const updateAssignment = async (assignmentId, assignmentUpdates) => {
   await model.updateOne({ _id: assignmentId }, { $set: assignmentUpdates });
-  return model.findById(assignmentId);
+  return model.findById(assignmentId).lean();
 };
 
