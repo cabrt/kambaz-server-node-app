@@ -13,7 +13,24 @@ import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 
 // Connect to MongoDB
 const CONNECTION_STRING = process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
-mongoose.connect(CONNECTION_STRING);
+
+// Connection options for MongoDB Atlas
+const mongooseOptions = {
+  // For MongoDB Atlas, these options help with SSL/TLS
+  serverSelectionTimeoutMS: 5000, // How long to try selecting a server
+  socketTimeoutMS: 45000, // How long to wait for a socket connection
+};
+
+// If using MongoDB Atlas (mongodb+srv://), add SSL options
+if (CONNECTION_STRING.includes("mongodb+srv://")) {
+  mongooseOptions.tls = true;
+  mongooseOptions.tlsAllowInvalidCertificates = false;
+}
+
+mongoose.connect(CONNECTION_STRING, mongooseOptions).catch((err) => {
+  console.error("MongoDB connection failed:", err);
+  process.exit(1);
+});
 
 mongoose.connection.on("connected", () => {
   console.log("MongoDB connected successfully");

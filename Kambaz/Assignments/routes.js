@@ -1,33 +1,53 @@
 import * as assignmentsDao from "./dao.js";
 
 export default function AssignmentRoutes(app) {
-  app.get("/api/courses/:courseId/assignments", (req, res) => {
+  const findAssignmentsForCourse = async (req, res) => {
     const { courseId } = req.params;
-    const assignments = assignmentsDao.findAssignmentsForCourse(courseId);
+    const assignments = await assignmentsDao.findAssignmentsForCourse(courseId);
     res.json(assignments);
-  });
+  };
 
-  app.post("/api/courses/:courseId/assignments", (req, res) => {
+  const findAssignmentById = async (req, res) => {
+    const { assignmentId } = req.params;
+    const assignment = await assignmentsDao.findAssignmentById(assignmentId);
+    if (assignment) {
+      res.json(assignment);
+    } else {
+      res.status(404).json({ message: "Assignment not found" });
+    }
+  };
+
+  const createAssignment = async (req, res) => {
     const { courseId } = req.params;
     const assignment = {
       ...req.body,
       course: courseId,
     };
-    const newAssignment = assignmentsDao.createAssignment(assignment);
-    res.send(newAssignment);
-  });
+    const newAssignment = await assignmentsDao.createAssignment(assignment);
+    res.json(newAssignment);
+  };
 
-  app.delete("/api/assignments/:assignmentId", (req, res) => {
+  const deleteAssignment = async (req, res) => {
     const { assignmentId } = req.params;
-    assignmentsDao.deleteAssignment(assignmentId);
-    res.sendStatus(200);
-  });
+    await assignmentsDao.deleteAssignment(assignmentId);
+    res.json({ status: "Assignment deleted successfully" });
+  };
 
-  app.put("/api/assignments/:assignmentId", (req, res) => {
+  const updateAssignment = async (req, res) => {
     const { assignmentId } = req.params;
     const assignmentUpdates = req.body;
-    const updatedAssignment = assignmentsDao.updateAssignment(assignmentId, assignmentUpdates);
-    res.json(updatedAssignment);
-  });
+    const updatedAssignment = await assignmentsDao.updateAssignment(assignmentId, assignmentUpdates);
+    if (updatedAssignment) {
+      res.json(updatedAssignment);
+    } else {
+      res.status(404).json({ message: "Assignment not found" });
+    }
+  };
+
+  app.get("/api/courses/:courseId/assignments", findAssignmentsForCourse);
+  app.get("/api/assignments/:assignmentId", findAssignmentById);
+  app.post("/api/courses/:courseId/assignments", createAssignment);
+  app.delete("/api/assignments/:assignmentId", deleteAssignment);
+  app.put("/api/assignments/:assignmentId", updateAssignment);
 }
 
