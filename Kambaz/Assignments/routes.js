@@ -38,7 +38,7 @@ export default function AssignmentRoutes(app) {
     const assignmentUpdates = req.body;
     const updatedAssignment = await assignmentsDao.updateAssignment(assignmentId, assignmentUpdates);
     if (updatedAssignment) {
-      res.json(updatedAssignment);
+    res.json(updatedAssignment);
     } else {
       res.status(404).json({ message: "Assignment not found" });
     }

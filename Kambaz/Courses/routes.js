@@ -32,8 +32,13 @@ export default function CourseRoutes(app) {
   const updateCourse = async (req, res) => {
     const { courseId } = req.params;
     const courseUpdates = req.body;
-    const status = await dao.updateCourse(courseId, courseUpdates);
-    res.send(status);
+    // Remove _id from updates as MongoDB doesn't allow updating _id
+    const { _id, ...updatesWithoutId } = courseUpdates;
+    console.log("Updating course:", { courseId, updates: updatesWithoutId });
+    const status = await dao.updateCourse(courseId, updatesWithoutId);
+    // Return the updated course
+    const updatedCourse = await dao.findCourseById(courseId);
+    res.json(updatedCourse);
   };
 
   const createCourse = async (req, res) => {
